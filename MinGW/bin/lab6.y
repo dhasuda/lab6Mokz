@@ -1952,7 +1952,7 @@ void ExecQuadRead (quadrupla quad) {
          			fscanf (finput, "%c", opndaux.atr.simb->valchar); break;
      		}
   	}
-}
+  }
 
 
 void InterpCodIntermed () {
@@ -1999,7 +1999,6 @@ void InterpCodIntermed () {
       case OPREAD: printf("OPREAD:\n"); ExecQuadRead(quad); break;
 		}
 
-    if (quadprox == NULL) {encerra = VERDADE;}
 		if (! encerra) quad = quadprox;
 	}
 	printf ("\n");
