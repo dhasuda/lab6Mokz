@@ -1,0 +1,22 @@
+AnaliseDeTexto {{{
+
+var {
+    char c; logic fim;
+}
+
+
+void ExibirTabela ()
+var {
+	logic fsdim;
+}
+statements {
+}
+
+main
+var {
+	int i;
+}
+statements {
+}
+
+}}}

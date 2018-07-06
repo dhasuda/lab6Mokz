@@ -1,0 +1,30 @@
+/*  Programa para contar as ocorrencias das
+    palavras de um texto                    */
+
+AnaliseDeTexto {{{
+
+/*  Modulo principal  */
+main
+var {
+	int i, posic;
+    	char c; logic fim;
+}
+statements {
+	ntab := 0;
+
+	while c = 's' || c = 'S' do {
+        	write ("\nDigite a palavra: ");
+        	fim := false;
+		for i (0: !fim: i+1) {
+            	read (palavra[i]);
+            	if palavra[i] = '\n' then {
+                	fim := true;
+                	palavra[i] := '\0';
+            	}
+        	}
+		posic := Procura ();
+		if posic > 0 then
+			nocorr[posic] := nocorr[posic] + 1;
+	}
+}
+}}}

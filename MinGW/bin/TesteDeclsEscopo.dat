@@ -1,0 +1,29 @@
+AnaliseDeTexto {{{
+
+var {
+   char c; logic fim; int fim;
+}
+
+void ExibirTabela (  )
+var {
+	logic fim;
+}
+statements {
+}
+
+void c ()
+var {
+	logic abac; int abac;
+}
+statements {
+}
+
+main
+var {
+	int i;
+}
+statements {
+	c := i; 
+}
+
+}}}

@@ -1,0 +1,455 @@
+AnaliseDeTexto {{{
+var {
+	char nomes[ 50 , 10 ] , palavra[ 10 ] ;
+	int ntab, nocorr[ 50 ] ;
+	char c;
+	logic fim;
+}
+int Procura ()
+ ****** Procuravar {
+	int i, inf, sup, med, posic, compara;
+	logic achou, fimteste;
+}
+statements {
+	achou := false ;
+	inf := 1 ;
+	sup := ntab ;
+	while ! achou && sup >= inf do 
+	{
+		med := ( inf + sup ) / 2 ;
+		compara := 0 ;
+		fimteste := false ;
+		for i ( 0 : ! fimteste && compara = 0 : i + 1 )
+		{
+			if palavra [ i ] < nomes [ med , i ] then 
+				compara := ~ 1 ;
+			else
+ 				if palavra [ i ] > nomes [ med , i ] then 
+					compara := 1 ;
+			if palavra [ i ] = ''\0'' || nomes [ med , i ] = ''\0'' then 
+				fimteste := true ;
+		}
+		if compara = 0 then 
+			achou := true ;
+		else
+ 			if compara < 0 then 
+				sup := med - 1 ;
+			else
+ 				inf := med + 1 ;
+	}
+	if achou then 
+		posic := med ;
+	else
+ 		posic := ~ inf ;
+	return posic ;
+}
+void Inserir (int posic )
+var {
+	int i, j;
+	logic fim;
+}
+statements {
+	ntab := ntab + 1 ;
+	for i ( ntab : i >= posic + 1 : i - 1 )
+	{
+		fim := false ;
+		for j ( 0 : ! fim : j + 1 )
+		{
+			nomes [ i , j ] := nomes [ i - 1 , j ] ;
+			if nomes [ i , j ] = ''\0'' then 
+				fim := true ;
+		}
+		nocorr [ i ] := nocorr [ i - 1 ] ;
+	}
+	fim := false ;
+	for j ( 0 : ! fim : j + 1 )
+	{
+		nomes [ posic , j ] := palavra [ j ] ;
+		if palavra [ j ] = ''\0'' then 
+			fim := true ;
+	}
+	nocorr [ posic ] := 1 ;
+}
+void ExibirTabela ()
+ ****** ExibirTabelavar {
+	int i;
+	logic fim;
+	int j;
+}
+statements {
+	write ( "          ", "Palavra             ", "   Num. de ocorr.");
+	for i ( 1 : i <= 50 : i + 1 )
+		write ( "-");
+	for i ( 1 : i <= ntab : i + 1 )
+	{
+		write ( "\n          ");
+		fim := false ;
+		for j ( 0 : ! fim : j + 1 )
+		{
+			if nomes [ i , j ] = ''\0'' then 
+				fim := true ;
+			else
+ 				write ( nomes [ i , j ] );
+		}
+		write ( " | ", nocorr [ i ] );
+	}
+}
+main
+var {
+	int i, posic;
+	char c;
+	logic fim;
+}
+statements {
+	ntab := 0 ;
+	write ( "Nova palavra? (s/n): ");
+	read (c );
+	while c = ''s'' || c = ''S'' do 
+	{
+		write ( "\nDigite a palavra: ");
+		fim := false ;
+		for i ( 0 : ! fim : i + 1 )
+		{
+			read (palavra [ i ] );
+			if palavra [ i ] = ''\n'' then 
+			{
+				fim := true ;
+				palavra [ i ] := ''\0'' ;
+			}
+		}
+		posic := - O tipo do FuncCall e: 1 -Procura();
+		if posic > 0 then 
+			nocorr [ posic ] := nocorr [ posic ] + 1 ;
+		else
+ 			call Inserir(i );
+		write ( "\n\nNova palavra? (s/n): ");
+		read (c );
+	}
+	call ExibirTabela();
+}
+}}}
+
+c(Escopo: MAIN): Nao Inicializada
+c(Escopo: GLOBAL): Nao Inicializada
+c(Escopo: GLOBAL): Nao Referenciada
+i(Escopo: MAIN): Nao Inicializada
+i(Escopo: ExibirTabela): Nao Inicializada
+i(Escopo: Inserir): Nao Inicializada
+posic(Escopo: Inserir): Nao Inicializada
+i(Escopo: Procura): Nao Inicializada
+j(Escopo: ExibirTabela): Nao Inicializada
+j(Escopo: Inserir): Nao Inicializada
+fim(Escopo: GLOBAL): Nao Inicializada
+fim(Escopo: GLOBAL): Nao Referenciada
+
+
+   TABELA  DE  SIMBOLOS:
+
+Classe 0:
+  (ExibirTabela, IDFUNC, FUNCVOID, Escopo: GLOBAL, Quant de parametros: 0)
+Classe 3:
+  (compara, IDVAR, INTEIRO, Escopo: Procura, 1, 1)
+Classe 4:
+  (##1, IDVAR, LOGICO, Escopo: Procura, 1, 1)
+Classe 5:
+  (##2, IDVAR, LOGICO, Escopo: Procura, 1, 1)
+Classe 6:
+  (##10, IDVAR, LOGICO, Escopo: Procura, 1, 1)
+  (##3, IDVAR, LOGICO, Escopo: Procura, 1, 1)
+Classe 7:
+  (c, IDVAR, CARACTERE, Escopo: MAIN, 0, 1)
+  (##20, IDVAR, INTEIRO, Escopo: Procura, 1, 1)
+  (##11, IDVAR, INTEIRO, Escopo: Procura, 1, 1)
+  (##4, IDVAR, INTEIRO, Escopo: Procura, 1, 1)
+  (c, IDVAR, CARACTERE, Escopo: GLOBAL, 0, 0)
+  (ntab, IDVAR, INTEIRO, Escopo: GLOBAL, 1, 1)
+  (palavra, IDVAR, CARACTERE, Escopo: GLOBAL, 1, 1)
+Classe 8:
+  (##30, IDVAR, LOGICO, Escopo: Inserir, 1, 1)
+  (##21, IDVAR, INTEIRO, Escopo: Inserir, 1, 1)
+  (##12, IDVAR, LOGICO, Escopo: Procura, 1, 1)
+  (##5, IDVAR, INTEIRO, Escopo: Procura, 1, 1)
+Classe 9:
+  (##40, IDVAR, LOGICO, Escopo: MAIN, 1, 1)
+  (##31, IDVAR, INTEIRO, Escopo: Inserir, 1, 1)
+  (##22, IDVAR, INTEIRO, Escopo: Inserir, 1, 1)
+  (##13, IDVAR, LOGICO, Escopo: Procura, 1, 1)
+  (##6, IDVAR, LOGICO, Escopo: Procura, 1, 1)
+Classe 10:
+  (##50, IDVAR, FUNCVOID, Escopo: MAIN, 1, 1)
+  (##41, IDVAR, LOGICO, Escopo: MAIN, 1, 1)
+  (##32, IDVAR, LOGICO, Escopo: Inserir, 1, 1)
+  (##23, IDVAR, LOGICO, Escopo: Inserir, 1, 1)
+  (##14, IDVAR, LOGICO, Escopo: Procura, 1, 1)
+  (##7, IDVAR, LOGICO, Escopo: Procura, 1, 1)
+Classe 11:
+  (##42, IDVAR, LOGICO, Escopo: MAIN, 1, 1)
+  (##33, IDVAR, LOGICO, Escopo: ExibirTabela, 1, 1)
+  (##24, IDVAR, INTEIRO, Escopo: Inserir, 1, 1)
+  (##15, IDVAR, LOGICO, Escopo: Procura, 1, 1)
+  (##8, IDVAR, LOGICO, Escopo: Procura, 1, 1)
+  (med, IDVAR, INTEIRO, Escopo: Procura, 1, 1)
+Classe 12:
+  (##43, IDVAR, LOGICO, Escopo: MAIN, 1, 1)
+  (##34, IDVAR, INTEIRO, Escopo: ExibirTabela, 1, 1)
+  (##25, IDVAR, LOGICO, Escopo: Inserir, 1, 1)
+  (##16, IDVAR, LOGICO, Escopo: Procura, 1, 1)
+  (##9, IDVAR, INTEIRO, Escopo: Procura, 1, 1)
+Classe 13:
+  (##44, IDVAR, INTEIRO, Escopo: MAIN, 1, 1)
+  (posic, IDVAR, INTEIRO, Escopo: MAIN, 1, 1)
+  (i, IDVAR, INTEIRO, Escopo: MAIN, 0, 1)
+  (##35, IDVAR, LOGICO, Escopo: ExibirTabela, 1, 1)
+  (i, IDVAR, INTEIRO, Escopo: ExibirTabela, 0, 1)
+  (##26, IDVAR, INTEIRO, Escopo: Inserir, 1, 1)
+  (i, IDVAR, INTEIRO, Escopo: Inserir, 0, 1)
+  (posic, IDVAR, INTEIRO, Escopo: Inserir, 0, 1)
+  (##17, IDVAR, LOGICO, Escopo: Procura, 1, 1)
+  (posic, IDVAR, INTEIRO, Escopo: Procura, 1, 1)
+  (i, IDVAR, INTEIRO, Escopo: Procura, 0, 1)
+Classe 14:
+  (##45, IDVAR, LOGICO, Escopo: MAIN, 1, 1)
+  (##36, IDVAR, INTEIRO, Escopo: ExibirTabela, 1, 1)
+  (j, IDVAR, INTEIRO, Escopo: ExibirTabela, 0, 1)
+  (##27, IDVAR, INTEIRO, Escopo: Inserir, 1, 1)
+  (j, IDVAR, INTEIRO, Escopo: Inserir, 0, 1)
+  (##18, IDVAR, INTEIRO, Escopo: Procura, 1, 1)
+  (fimteste, IDVAR, LOGICO, Escopo: Procura, 1, 1)
+Classe 15:
+  (##46, IDVAR, INTEIRO, Escopo: MAIN, 1, 1)
+  (##37, IDVAR, LOGICO, Escopo: ExibirTabela, 1, 1)
+  (##28, IDVAR, LOGICO, Escopo: Inserir, 1, 1)
+  (##19, IDVAR, INTEIRO, Escopo: Procura, 1, 1)
+  (nocorr, IDVAR, INTEIRO, Escopo: GLOBAL, 1, 1)
+Classe 16:
+  (##47, IDVAR, LOGICO, Escopo: MAIN, 1, 1)
+  (##38, IDVAR, INTEIRO, Escopo: ExibirTabela, 1, 1)
+  (##29, IDVAR, INTEIRO, Escopo: Inserir, 1, 1)
+Classe 17:
+  (##48, IDVAR, INTEIRO, Escopo: MAIN, 1, 1)
+  (fim, IDVAR, LOGICO, Escopo: MAIN, 1, 1)
+  (MAIN, IDFUNC, NAOVAR, Escopo: GLOBAL, Quant de parametros: 0)
+  (##39, IDVAR, LOGICO, Escopo: ExibirTabela, 1, 1)
+  (fim, IDVAR, LOGICO, Escopo: ExibirTabela, 1, 1)
+  (fim, IDVAR, LOGICO, Escopo: Inserir, 1, 1)
+  (fim, IDVAR, LOGICO, Escopo: GLOBAL, 0, 0)
+  (nomes, IDVAR, CARACTERE, Escopo: GLOBAL, 1, 1)
+Classe 18:
+  (##49, IDVAR, FUNCVOID, Escopo: MAIN, 1, 1)
+  (inf, IDVAR, INTEIRO, Escopo: Procura, 1, 1)
+Classe 19:
+  (Inserir, IDFUNC, FUNCVOID, Escopo: GLOBAL, Quant de parametros: 1, Tipos dos paramentros: INTEIRO)
+  (c, IDFUNC, INTEIRO, Escopo: GLOBAL, Quant de parametros: 0)
+Classe 22:
+  (achou, IDVAR, LOGICO, Escopo: Procura, 1, 1)
+  (sup, IDVAR, INTEIRO, Escopo: Procura, 1, 1)
+  (AnaliseDeTexto, IDPROG)
+  (AnaliseDeTexto, IDPROG)
+
+
+*************** QUADRUPLAS ***************
+
+Header:
+  Simbolo: AnaliseDeTexto, GLOBAL
+  Lista de quadruplas:
+    1) OPENMOD, (MODULO), (IDLE), (IDLE)
+
+Header:
+  Simbolo: c, GLOBAL
+  Lista de quadruplas:
+    1) OPENMOD, (MODULO), (IDLE), (IDLE)
+    2) ATRIB, (LOGIC, 0), (IDLE), (VAR, achou)
+    3) ATRIB, (INT, 1), (IDLE), (VAR, inf)
+    4) ATRIB, (VAR, ntab), (IDLE), (VAR, sup)
+    5) NOT, (VAR, achou), (IDLE), (VAR, ##1)
+    6) GE, (VAR, sup), (VAR, inf), (VAR, ##2)
+    7) AND, (VAR, ##1), (VAR, ##1), (VAR, ##3)
+    8) NONE, (IDLE), (IDLE), (IDLE)
+    9) JF, (VAR, ##3), (IDLE), (ROTULO, 60)
+    10) MAIS, (VAR, inf), (VAR, sup), (VAR, ##4)
+    11) DIV, (VAR, ##4), (INT, ##4), (VAR, ##5)
+    12) ATRIB, (VAR, ##5), (IDLE), (VAR, med)
+    13) ATRIB, (INT, 0), (IDLE), (VAR, compara)
+    14) ATRIB, (LOGIC, 0), (IDLE), (VAR, fimteste)
+    15) ATRIB, (INT, 0), (IDLE), (VAR, i)
+    16) NOT, (VAR, fimteste), (IDLE), (VAR, ##6)
+    17) EQ, (VAR, compara), (INT, 0), (VAR, ##7)
+    18) AND, (VAR, ##6), (VAR, ##6), (VAR, ##8)
+    19) JF, (VAR, ##8), (IDLE), (ROTULO, 43)
+    20) MAIS, (VAR, i), (INT, 1), (VAR, ##9)
+    21) LT, (VAR, palavra), (VAR, nomes), (VAR, ##10)
+    22) JF, (VAR, ##10), (IDLE), (ROTULO, 25)
+    23) MENUN, (INT, 1), (IDLE), (VAR, ##11)
+    24) ATRIB, (VAR, ##11), (IDLE), (VAR, compara)
+    25) NONE, (IDLE), (IDLE), (IDLE)
+    26) JUMP, (VAR, ##10), (IDLE), (ROTULO, 33)
+    27) GT, (VAR, palavra), (VAR, nomes), (VAR, ##12)
+    28) JF, (VAR, ##12), (IDLE), (ROTULO, 30)
+    29) ATRIB, (INT, 1), (IDLE), (VAR, compara)
+    30) NONE, (IDLE), (IDLE), (IDLE)
+    31) JUMP, (VAR, ##12), (IDLE), (ROTULO, 32)
+    32) NONE, (IDLE), (IDLE), (IDLE)
+    33) NONE, (IDLE), (IDLE), (IDLE)
+    34) EQ, (VAR, palavra), (CARAC, '\n'), (VAR, ##13)
+    35) EQ, (VAR, nomes), (CARAC, À£), (VAR, ##14)
+    36) OR, (VAR, ##13), (VAR, ##13), (VAR, ##15)
+    37) JF, (VAR, ##15), (IDLE), (ROTULO, 39)
+    38) ATRIB, (LOGIC, 1), (IDLE), (VAR, fimteste)
+    39) NONE, (IDLE), (IDLE), (IDLE)
+    40) JUMP, (VAR, ##15), (IDLE), (ROTULO, 41)
+    41) NONE, (IDLE), (IDLE), (IDLE)
+    42) JUMP, (VAR, ##8), (IDLE), (ROTULO, 19)
+    43) NONE, (IDLE), (IDLE), (IDLE)
+    44) EQ, (VAR, compara), (INT, 0), (VAR, ##16)
+    45) JF, (VAR, ##16), (IDLE), (ROTULO, 47)
+    46) ATRIB, (LOGIC, 1), (IDLE), (VAR, achou)
+    47) NONE, (IDLE), (IDLE), (IDLE)
+    48) JUMP, (VAR, ##16), (IDLE), (ROTULO, 58)
+    49) LT, (VAR, compara), (INT, 0), (VAR, ##17)
+    50) JF, (VAR, ##17), (IDLE), (ROTULO, 53)
+    51) MAIS, (VAR, med), (INT, 1), (VAR, ##18)
+    52) ATRIB, (VAR, ##18), (IDLE), (VAR, sup)
+    53) NONE, (IDLE), (IDLE), (IDLE)
+    54) JUMP, (VAR, ##17), (IDLE), (ROTULO, 57)
+    55) MAIS, (VAR, med), (INT, 1), (VAR, ##19)
+    56) ATRIB, (VAR, ##19), (IDLE), (VAR, inf)
+    57) NONE, (IDLE), (IDLE), (IDLE)
+    58) NONE, (IDLE), (IDLE), (IDLE)
+    59) JUMP, (VAR, ##3), (IDLE), (ROTULO, 9)
+    60) NONE, (IDLE), (IDLE), (IDLE)
+    61) JF, (VAR, achou), (IDLE), (ROTULO, 63)
+    62) ATRIB, (VAR, med), (IDLE), (VAR, posic)
+    63) NONE, (IDLE), (IDLE), (IDLE)
+    64) JUMP, (VAR, achou), (IDLE), (ROTULO, 67)
+    65) MENUN, (VAR, inf), (IDLE), (VAR, ##20)
+    66) ATRIB, (VAR, ##20), (IDLE), (VAR, posic)
+    67) NONE, (IDLE), (IDLE), (IDLE)
+
+Header:
+  Simbolo: Inserir, GLOBAL
+  Lista de quadruplas:
+    1) OPENMOD, (MODULO), (IDLE), (IDLE)
+    2) MAIS, (VAR, ntab), (INT, 1), (VAR, ##21)
+    3) ATRIB, (VAR, ##21), (IDLE), (VAR, ntab)
+    4) ATRIB, (VAR, ntab), (IDLE), (VAR, i)
+    5) MAIS, (VAR, posic), (INT, 1), (VAR, ##22)
+    6) GE, (VAR, i), (VAR, ##22), (VAR, ##23)
+    7) JF, (VAR, ##23), (IDLE), (ROTULO, 27)
+    8) MAIS, (VAR, i), (INT, 1), (VAR, ##24)
+    9) ATRIB, (LOGIC, 0), (IDLE), (VAR, fim)
+    10) ATRIB, (INT, 0), (IDLE), (VAR, j)
+    11) NOT, (VAR, fim), (IDLE), (VAR, ##25)
+    12) JF, (VAR, ##25), (IDLE), (ROTULO, 23)
+    13) MAIS, (VAR, j), (INT, 1), (VAR, ##26)
+    14) MAIS, (VAR, i), (INT, 1), (VAR, ##27)
+    15) ATRIB, (VAR, nomes), (IDLE), (VAR, nomes)
+    16) EQ, (VAR, nomes), (CARAC, ), (VAR, ##28)
+    17) JF, (VAR, ##28), (IDLE), (ROTULO, 19)
+    18) ATRIB, (LOGIC, 1), (IDLE), (VAR, fim)
+    19) NONE, (IDLE), (IDLE), (IDLE)
+    20) JUMP, (VAR, ##28), (IDLE), (ROTULO, 21)
+    21) NONE, (IDLE), (IDLE), (IDLE)
+    22) JUMP, (VAR, ##25), (IDLE), (ROTULO, 12)
+    23) NONE, (IDLE), (IDLE), (IDLE)
+    24) MAIS, (VAR, i), (INT, 1), (VAR, ##29)
+    25) ATRIB, (VAR, nocorr), (IDLE), (VAR, nocorr)
+    26) JUMP, (VAR, ##23), (IDLE), (ROTULO, 7)
+    27) NONE, (IDLE), (IDLE), (IDLE)
+    28) ATRIB, (LOGIC, 0), (IDLE), (VAR, fim)
+    29) ATRIB, (INT, 0), (IDLE), (VAR, j)
+    30) NOT, (VAR, fim), (IDLE), (VAR, ##30)
+    31) JF, (VAR, ##30), (IDLE), (ROTULO, 41)
+    32) MAIS, (VAR, j), (INT, 1), (VAR, ##31)
+    33) ATRIB, (VAR, palavra), (IDLE), (VAR, nomes)
+    34) EQ, (VAR, palavra), (CARAC, i), (VAR, ##32)
+    35) JF, (VAR, ##32), (IDLE), (ROTULO, 37)
+    36) ATRIB, (LOGIC, 1), (IDLE), (VAR, fim)
+    37) NONE, (IDLE), (IDLE), (IDLE)
+    38) JUMP, (VAR, ##32), (IDLE), (ROTULO, 39)
+    39) NONE, (IDLE), (IDLE), (IDLE)
+    40) JUMP, (VAR, ##30), (IDLE), (ROTULO, 31)
+    41) NONE, (IDLE), (IDLE), (IDLE)
+    42) ATRIB, (INT, 1), (IDLE), (VAR, nocorr)
+
+Header:
+  Simbolo: ExibirTabela, GLOBAL
+  Lista de quadruplas:
+    1) OPENMOD, (MODULO), (IDLE), (IDLE)
+    2) WRITE, (INT, 3), (IDLE), (IDLE)
+    3) ATRIB, (INT, 1), (IDLE), (VAR, i)
+    4) LE, (VAR, i), (INT, 50), (VAR, ##33)
+    5) JF, (VAR, ##33), (IDLE), (ROTULO, 9)
+    6) MAIS, (VAR, i), (INT, 1), (VAR, ##34)
+    7) WRITE, (INT, 1), (IDLE), (IDLE)
+    8) JUMP, (VAR, ##33), (IDLE), (ROTULO, 5)
+    9) NONE, (IDLE), (IDLE), (IDLE)
+    10) ATRIB, (INT, 1), (IDLE), (VAR, i)
+    11) LE, (VAR, i), (VAR, ntab), (VAR, ##35)
+    12) JF, (VAR, ##35), (IDLE), (ROTULO, 31)
+    13) MAIS, (VAR, i), (INT, 1), (VAR, ##36)
+    14) WRITE, (INT, 1), (IDLE), (IDLE)
+    15) ATRIB, (LOGIC, 0), (IDLE), (VAR, fim)
+    16) ATRIB, (INT, 0), (IDLE), (VAR, j)
+    17) NOT, (VAR, fim), (IDLE), (VAR, ##37)
+    18) JF, (VAR, ##37), (IDLE), (ROTULO, 28)
+    19) MAIS, (VAR, j), (INT, 1), (VAR, ##38)
+    20) EQ, (VAR, nomes), (CARAC, ), (VAR, ##39)
+    21) JF, (VAR, ##39), (IDLE), (ROTULO, 23)
+    22) ATRIB, (LOGIC, 1), (IDLE), (VAR, fim)
+    23) NONE, (IDLE), (IDLE), (IDLE)
+    24) JUMP, (VAR, ##39), (IDLE), (ROTULO, 26)
+    25) WRITE, (INT, 1), (IDLE), (IDLE)
+    26) NONE, (IDLE), (IDLE), (IDLE)
+    27) JUMP, (VAR, ##37), (IDLE), (ROTULO, 18)
+    28) NONE, (IDLE), (IDLE), (IDLE)
+    29) WRITE, (INT, 2), (IDLE), (IDLE)
+    30) JUMP, (VAR, ##35), (IDLE), (ROTULO, 12)
+    31) NONE, (IDLE), (IDLE), (IDLE)
+    32) RET, (IDLE), (IDLE), (IDLE)
+
+Header:
+  Simbolo: MAIN, GLOBAL
+  Lista de quadruplas:
+    1) ATRIB, (INT, 0), (IDLE), (VAR, ntab)
+    2) WRITE, (INT, 1), (IDLE), (IDLE)
+    3) READ, (INT, 1), (IDLE), (IDLE)
+    4) EQ, (VAR, c), (CARAC, ExibirTabela), (VAR, ##40)
+    5) EQ, (VAR, c), (CARAC, ), (VAR, ##41)
+    6) OR, (VAR, ##40), (VAR, ##40), (VAR, ##42)
+    7) NONE, (IDLE), (IDLE), (IDLE)
+    8) JF, (VAR, ##42), (IDLE), (ROTULO, 39)
+    9) WRITE, (INT, 1), (IDLE), (IDLE)
+    10) ATRIB, (LOGIC, 0), (IDLE), (VAR, fim)
+    11) ATRIB, (INT, 0), (IDLE), (VAR, i)
+    12) NOT, (VAR, fim), (IDLE), (VAR, ##43)
+    13) JF, (VAR, ##43), (IDLE), (ROTULO, 24)
+    14) MAIS, (VAR, i), (INT, 1), (VAR, ##44)
+    15) READ, (INT, 1), (IDLE), (IDLE)
+    16) EQ, (VAR, palavra), (CARAC, ), (VAR, ##45)
+    17) JF, (VAR, ##45), (IDLE), (ROTULO, 20)
+    18) ATRIB, (LOGIC, 1), (IDLE), (VAR, fim)
+    19) ATRIB, (CARAC, ), (IDLE), (VAR, palavra)
+    20) NONE, (IDLE), (IDLE), (IDLE)
+    21) JUMP, (VAR, ##45), (IDLE), (ROTULO, 22)
+    22) NONE, (IDLE), (IDLE), (IDLE)
+    23) JUMP, (VAR, ##43), (IDLE), (ROTULO, 13)
+    24) NONE, (IDLE), (IDLE), (IDLE)
+    25) OPCALL, (FUNCAO, c), (INT, 363), (VAR, ##46)
+    26) ATRIB, (FUNCAO, c), (IDLE), (VAR, posic)
+    27) GT, (VAR, posic), (INT, 0), (VAR, ##47)
+    28) JF, (VAR, ##47), (IDLE), (ROTULO, 31)
+    29) MAIS, (VAR, nocorr), (INT, 1), (VAR, ##48)
+    30) ATRIB, (VAR, ##48), (IDLE), (VAR, nocorr)
+    31) NONE, (IDLE), (IDLE), (IDLE)
+    32) JUMP, (VAR, ##47), (IDLE), (ROTULO, 35)
+    33) PARAM, (VAR, i), (IDLE), (IDLE)
+    34) OPCALL, (FUNCAO, Inserir), (INT, 1), (VAR, ##49)
+    35) NONE, (IDLE), (IDLE), (IDLE)
+    36) WRITE, (INT, 1), (IDLE), (IDLE)
+    37) READ, (INT, 1), (IDLE), (IDLE)
+    38) JUMP, (VAR, ##42), (IDLE), (ROTULO, 8)
+    39) NONE, (IDLE), (IDLE), (IDLE)
+    40) OPCALL, (FUNCAO, ExibirTabela), (INT, 0), (VAR, ##50)
+
+
+
