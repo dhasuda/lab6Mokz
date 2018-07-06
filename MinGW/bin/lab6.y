@@ -54,6 +54,7 @@
 #define   OPREAD   24
 #define   OPWRITE   25
 #define   OPNONE    26
+#define   OPEXIT    27
 
 /* Definicao de constantes para os tipos de operandos de quadruplas */
 
@@ -96,10 +97,10 @@ char *nometipvar[6] = {"NAOVAR",
 
 /* Strings para operadores de quadruplas */
 
-char *nomeoperquad[27] = {"",
+char *nomeoperquad[28] = {"",
 	"OR", "AND", "LT", "LE", "GT", "GE", "EQ", "NE", "MAIS",
 	"MENOS", "MULT", "DIV", "RESTO", "MENUN", "NOT", "ATRIB",
-	"OPENMOD", "NOP", "JUMP", "JF", "PARAM", "OPCALL", "RET", "READ", "WRITE", "NONE"
+	"OPENMOD", "NOP", "JUMP", "JF", "PARAM", "OPCALL", "RET", "READ", "WRITE", "NONE", "EXIT"
 };
 
 /*
@@ -160,6 +161,9 @@ struct celsimb {
     simbolo prox;
     parametros param;
     modhead fhead;
+    int *valint;
+    float *valfloat;
+    char *valchar, *vallogic;
 };
 
 /*  Variaveis globais para a tabela de simbolos e analise semantica */
@@ -210,6 +214,36 @@ void ImprimeQuadruplas (void);
 quadrupla GeraQuadrupla (int, operando, operando, operando, int);
 simbolo NovaTemp (int);
 void RenumQuadruplas (quadrupla, quadrupla);
+
+
+FILE *finput;
+/* Prototipos das funcoes para o interpretador */
+
+void InterpCodIntermed (void);
+void AlocaVariaveis (void);
+void ExecQuadWrite (quadrupla);
+void ExecQuadMais (quadrupla);
+void ExecQuadLT (quadrupla);
+void ExecQuadAtrib (quadrupla);
+void ExecQuadRead (quadrupla);
+
+/*	Declaracoes para pilhas de operandos  */
+
+typedef struct nohopnd nohopnd;
+struct nohopnd {
+	operando opnd;
+	nohopnd *prox;
+};
+typedef nohopnd *pilhaoperando;
+pilhaoperando pilhaopnd;
+
+/*  Prototipos das funcoes para pilhas de operandos  */
+
+void EmpilharOpnd (operando, pilhaoperando *);
+void DesempilharOpnd (pilhaoperando *);
+operando TopoOpnd (pilhaoperando);
+void InicPilhaOpnd (pilhaoperando *);
+char VaziaOpnd (pilhaoperando);
 
 /* Declaracoes para atributos das expressoes e variaveis */
 
@@ -329,11 +363,13 @@ Prog            :   {
                         GeraQuadrupla(OPENMOD, opnd1, opndidle, opndidle, 0);
                     }
                     Decls  {SetarEscopo("GLOBAL");} ModList MainMod CLTRIP  {
+                        GeraQuadrupla(OPEXIT, opndidle, opndidle, opndidle, 0);
                         printf ("}}}\n");
                         GeraQuadrupla(OPRET, opndidle, opndidle, opndidle, 0);
                         VerificaInicRef ();
                         ImprimeTabSimb ();
                         ImprimeQuadruplas();
+                        InterpCodIntermed();
                     }
 
 Decls           :
@@ -1506,43 +1542,43 @@ int hash (char *cadeia) {
 /* ImprimeTabSimb: Imprime todo o conteudo da tabela de simbolos  */
 
 void ImprimeTabSimb () {
-     // int i; simbolo s;
-     // printf ("\n\n   TABELA  DE  SIMBOLOS:\n\n");
-     // for (i = 0; i < NCLASSHASH; i++)
-     //     if (tabsimb[i]) {
-     //        printf ("Classe %d:\n", i);
-     //        for (s = tabsimb[i]; s!=NULL; s = s->prox){
-     //            printf ("  (%s, %s", s->cadeia,  nometipid[s->tid]);
-     //           if (s->tid == IDVAR){
-     //               printf (", %s, Escopo: %s, %d, %d",
-     //                   nometipvar[s->tvar], s->escopo, s->inic, s->ref);
-     //          //     if (s->array == VERDADE) {
-     //          //         int j;
-     //          //         printf (", EH ARRAY\n\tndims = %d, dimensoes:", s->ndims);
-     //          //         for (j = 1; j <= s->ndims; j++)
-     //          //                     printf ("  %d", s->dims[j]);
-     //          //     }
-     //
-     //           }
-     //           if (s->tid == IDFUNC){
-     //               printf (", %s, Escopo: %s",nometipvar[s->tvar], s->escopo);
-     //               printf(", Quant de parametros: %d", s->param->tipo);
-     //               parametros p = s->param->prox;
-     //               if (s->param->prox > 0) {
-     //                 printf(", Tipos dos paramentros: ");
-     //                 while(p != NULL) {
-     //                   if (p->prox == NULL) {
-     //                     printf("%s", nometipvar[p->tipo]);
-     //                   } else {
-     //                     printf("%s, ", nometipvar[p->tipo]);
-     //                   }
-     //                   p = p->prox;
-     //                 }
-     //               }
-     //           }
-     //            printf(")\n");
-     //         }
-     //     }
+     int i; simbolo s;
+     printf ("\n\n   TABELA  DE  SIMBOLOS:\n\n");
+     for (i = 0; i < NCLASSHASH; i++)
+         if (tabsimb[i]) {
+            printf ("Classe %d:\n", i);
+            for (s = tabsimb[i]; s!=NULL; s = s->prox){
+                printf ("  (%s, %s", s->cadeia,  nometipid[s->tid]);
+               if (s->tid == IDVAR){
+                   printf (", %s, Escopo: %s, %d, %d",
+                       nometipvar[s->tvar], s->escopo, s->inic, s->ref);
+              //     if (s->array == VERDADE) {
+              //         int j;
+              //         printf (", EH ARRAY\n\tndims = %d, dimensoes:", s->ndims);
+              //         for (j = 1; j <= s->ndims; j++)
+              //                     printf ("  %d", s->dims[j]);
+              //     }
+
+               }
+               if (s->tid == IDFUNC){
+                   printf (", %s, Escopo: %s",nometipvar[s->tvar], s->escopo);
+                   printf(", Quant de parametros: %d", s->param->tipo);
+                   parametros p = s->param->prox;
+                   if (s->param->prox > 0) {
+                     printf(", Tipos dos paramentros: ");
+                     while(p != NULL) {
+                       if (p->prox == NULL) {
+                         printf("%s", nometipvar[p->tipo]);
+                       } else {
+                         printf("%s, ", nometipvar[p->tipo]);
+                       }
+                       p = p->prox;
+                     }
+                   }
+               }
+                printf(")\n");
+             }
+         }
 }
 
 /*  Mensagens de erros semanticos  */
@@ -1615,4 +1651,375 @@ void TipoErradoDeArgumentos (int tipoEsperado, int arg) {
         printf("\n\n***** Tipo errado de argumento na chamada de função (argumento numero %d): esperava-se LOGICO *****\n\n", arg);
 
     }
+}
+
+// void AlocaVariaveis() {
+//   int i; simbolo s;
+//   for (i = 0; i < NCLASSHASH; i++)
+//       if (tabsimb[i]) {
+//          for (s = tabsimb[i]; s!=NULL; s = s->prox){
+//             if (s->tid == IDVAR){
+//
+//               int j;
+//               int totalDeCasas = 1;
+//               for (j=0; j < s->ndims; j++) {
+//                 totalDeCasas *= s->dims[j];
+//               }
+//
+//               switch(s->tvar) {
+//                 case INTEIRO:
+//                   s->valint = (int*) malloc(totalDeCasas*sizeof(int));
+//                 break;
+//                 case LOGICO:
+//                   s->vallogic = (char*) malloc(totalDeCasas*sizeof(char));
+//                 break;
+//                 case REAL:
+//                   s->valfloat = (float*) malloc(totalDeCasas*sizeof(float));
+//                 break;
+//                 case CARACTERE:
+//                   s->valchar = (char*) malloc(totalDeCasas*sizeof(char));
+//                 break;
+//               }
+//               /*
+//               TODO: alocar no celsimb
+//               */
+//             }
+//           }
+//       }
+// }
+void AlocaVariaveis () {
+	simbolo s; int nelemaloc, i, j;
+	printf ("\n\t\tAlocando as variaveis:");
+	for (i = 0; i < NCLASSHASH; i++)
+	       if (tabsimb[i]) {
+	              for (s = tabsimb[i]; s != NULL; s = s->prox){
+	                     if (s->tid == IDVAR) {
+	                            nelemaloc = 1;
+	                            if (s->array)
+	                                   for (j = 1; j <= s->ndims; j++)  nelemaloc *= s->dims[j];
+	                            switch (s->tvar) {
+	                                   case INTEIRO:
+	                                          s->valint = malloc (nelemaloc * sizeof (int)); break;
+	                                   case REAL:
+	                                          s->valfloat = malloc (nelemaloc * sizeof (float)); break;
+	                                   case CARACTERE:
+	                                          s->valchar = malloc (nelemaloc * sizeof (char)); break;
+	                                   case LOGICO:
+	                                          s->vallogic = malloc (nelemaloc * sizeof (char)); break;
+	                           }
+	                           printf ("\n\t\t\t%s: %d elemento(s) alocado(s) ", s->cadeia, nelemaloc);
+	                   }
+	      	 }
+	      }
+}
+
+void EmpilharOpnd (operando x, pilhaoperando *P) {
+	nohopnd *temp;
+	temp = *P;
+	*P = (nohopnd *) malloc (sizeof (nohopnd));
+	(*P)->opnd = x; (*P)->prox = temp;
+}
+
+void DesempilharOpnd (pilhaoperando *P) {
+	nohopnd *temp;
+	if (! VaziaOpnd (*P)) {
+		temp = *P;  *P = (*P)->prox; free (temp);
+	}
+	else  printf ("\n\tDelecao em pilha vazia\n");
+}
+
+operando TopoOpnd (pilhaoperando P) {
+	if (! VaziaOpnd (P))  return P->opnd;
+	else  printf ("\n\tTopo de pilha vazia\n");
+}
+
+void InicPilhaOpnd (pilhaoperando *P) {
+	*P = NULL;
+}
+
+char VaziaOpnd (pilhaoperando P) {
+	if  (P == NULL)  return 1;
+	else return 0;
+}
+
+void ExecQuadWrite (quadrupla quad) {
+	int i;  operando opndaux;  pilhaoperando pilhaopndaux;
+
+	printf ("\n\t\tEscrevendo: \n\n");
+	InicPilhaOpnd (&pilhaopndaux);
+	for (i = 1; i <= quad->opnd1.atr.valint; i++) {
+		EmpilharOpnd (TopoOpnd (pilhaopnd), &pilhaopndaux);
+		DesempilharOpnd (&pilhaopnd);
+	}
+  for (i = 1; i <= quad->opnd1.atr.valint; i++) {
+		opndaux = TopoOpnd (pilhaopndaux);
+		DesempilharOpnd (&pilhaopndaux);
+		switch (opndaux.tipo) {
+			case INTOPND:
+				printf ("%d", opndaux.atr.valint); break;
+			case REALOPND:
+				printf ("%g", opndaux.atr.valfloat); break;
+			case CHAROPND:
+				printf ("%c", opndaux.atr.valchar); break;
+			case LOGICOPND:
+				if (opndaux.atr.vallogic == 1) printf ("TRUE");
+				else printf ("FALSE");
+				break;
+			case CADOPND:
+				printf ("%s", opndaux.atr.valcad);
+				break ;
+        case VAROPND:
+  				switch (opndaux.atr.simb->tvar) {
+  					case INTEIRO:
+  						printf ("%d", *(opndaux.atr.simb->valint)); 					break;
+  					case REAL:
+  						printf ("%g",
+  						     *(opndaux.atr.simb->valfloat));break;
+  					case LOGICO:
+  						if (*(opndaux.atr.simb->vallogic) == 1)
+  							printf ("TRUE");
+  							else printf ("FALSE"); break;
+  					case CARACTERE:
+  						printf ("%c",
+  						    *(opndaux.atr.simb->valchar)); break;
+  				}
+  			break;
+      }
+  	}
+  	printf ("\n");
+  }
+
+void ExecQuadMais (quadrupla quad) {
+	int tipo1, tipo2, valint1, valint2;
+	float valfloat1, valfloat2;
+  switch (quad->opnd1.tipo) {
+  		case INTOPND:
+  			tipo1 = INTOPND;  valint1 = quad->opnd1.atr.valint;  break;
+  		case REALOPND:
+  			tipo1 = REALOPND;  valfloat1 = quad->opnd1.atr.valfloat; break;
+  		case CHAROPND:
+  			tipo1 = INTOPND;  valint1 = quad->opnd1.atr.valchar;  break;
+  		case VAROPND:
+  			switch (quad->opnd1.atr.simb->tvar) {
+  				case INTEIRO:
+  					tipo1 = INTOPND;
+  					valint1 = *(quad->opnd1.atr.simb->valint);  break;
+  				case REAL:
+  					tipo1 = REALOPND;
+  					valfloat1=*(quad->opnd1.atr.simb->valfloat);break;
+  				case CARACTERE:
+  					tipo1 = INTOPND;
+  					valint1 = *(quad->opnd1.atr.simb->valchar); break;
+  			}
+  			break;
+  	}
+  switch (quad->opnd2.tipo) {
+		case INTOPND:
+			tipo2 = INTOPND;  valint2 = quad->opnd2.atr.valint;  break;
+		case REALOPND:
+			tipo2 = REALOPND;  valfloat2 = quad->opnd2.atr.valfloat;  break;
+		case CHAROPND:
+			tipo2 = INTOPND;  valint2 = quad->opnd2.atr.valchar;  break;
+		case VAROPND:
+			switch (quad->opnd2.atr.simb->tvar) {
+				case INTEIRO:
+					tipo2 = INTOPND;
+					valint2 = *(quad->opnd2.atr.simb->valint);  break;
+				case REAL:
+					tipo2 = REALOPND;
+					valfloat2=*(quad->opnd2.atr.simb->valfloat);break;
+				case CARACTERE:
+					tipo2 = INTOPND;
+					valint2=*(quad->opnd2.atr.simb->valchar);break;
+			}
+			break;
+  }
+  switch (quad->result.atr.simb->tvar) {
+  		case INTEIRO:
+  			*(quad->result.atr.simb->valint) = valint1 + valint2;
+  			break;
+  		case REAL:
+  			if (tipo1 == INTOPND && tipo2 == INTOPND)
+  				*(quad->result.atr.simb->valfloat) = valint1 + valint2;
+  			if (tipo1 == INTOPND && tipo2 == REALOPND)
+  				*(quad->result.atr.simb->valfloat) = valint1 + valfloat2;
+  			if (tipo1 == REALOPND && tipo2 == INTOPND)
+  				*(quad->result.atr.simb->valfloat) = valfloat1 + valint2;
+  			if (tipo1 == REALOPND && tipo2 == REALOPND)
+  				*(quad->result.atr.simb->valfloat) = valfloat1 + valfloat2;
+  			break;
+  	}
+}
+
+void ExecQuadAtrib (quadrupla quad) {
+	int tipo1, valint1;
+	float valfloat1;
+	char valchar1, vallogic1;
+  switch (quad->opnd1.tipo) {
+  		case INTOPND:
+  			tipo1 = INTOPND;
+  			valint1 = quad->opnd1.atr.valint; break;
+  		case REALOPND:
+  			tipo1 = REALOPND;
+  			valfloat1 = quad->opnd1.atr.valfloat; break;
+  		case CHAROPND:
+  			tipo1 = CHAROPND;
+  			valchar1 = quad->opnd1.atr.valchar; break;
+  		case LOGICOPND:
+  			tipo1 = LOGICOPND;
+  			vallogic1 = quad->opnd1.atr.vallogic; break;
+      case VAROPND:
+      			switch (quad->opnd1.atr.simb->tvar) {
+      				case INTEIRO:
+      					tipo1 = INTOPND;
+      					valint1 = *(quad->opnd1.atr.simb->valint); break;
+      				case REAL:
+      					tipo1 = REALOPND;
+      					valfloat1=*(quad->opnd1.atr.simb->valfloat);break;
+      				case CARACTERE:
+      					tipo1 = CHAROPND;
+      					valchar1=*(quad->opnd1.atr.simb->valchar);break;
+      				case LOGICO:
+      					tipo1 = LOGICOPND;
+      					vallogic1 = *(quad->opnd1.atr.simb->vallogic);
+      					break;
+      			}
+      			break;
+      	}
+    switch (quad->result.atr.simb->tvar) {
+		case INTEIRO:
+			if (tipo1 == INTOPND)  *(quad->result.atr.simb->valint) = valint1;
+			if (tipo1 == CHAROPND)*(quad->result.atr.simb->valint)=valchar1;
+			break;
+		case CARACTERE:
+			if (tipo1 == INTOPND) *(quad->result.atr.simb->valchar) = valint1;
+			if (tipo1==CHAROPND)*(quad->result.atr.simb->valchar)=valchar1;
+			break;
+		case LOGICO:  *(quad->result.atr.simb->vallogic) = vallogic1; break;
+		case REAL:
+			if (tipo1 == INTOPND)
+				*(quad->result.atr.simb->valfloat) = valint1;
+			if (tipo1 == REALOPND)
+				*(quad->result.atr.simb->valfloat) = valfloat1;
+			if (tipo1 == CHAROPND)
+				*(quad->result.atr.simb->valfloat) = valchar1;
+			break;
+	}
+}
+
+void ExecQuadLT (quadrupla quad) {
+	int tipo1, tipo2, valint1, valint2;
+	float valfloat1, valfloat2;
+  switch (quad->opnd1.tipo) {
+		case INTOPND:
+			tipo1 = INTOPND;  valint1 = quad->opnd1.atr.valint;  break;
+		case REALOPND:
+			tipo1 = REALOPND; valfloat1=quad->opnd1.atr.valfloat;break;
+		case CHAROPND:
+			tipo1 = INTOPND; valint1 = quad->opnd1.atr.valchar; break;
+		case VAROPND:
+			switch (quad->opnd1.atr.simb->tvar) {
+				case INTEIRO:  tipo1 = INTOPND;
+					valint1 = *(quad->opnd1.atr.simb->valint);
+					break;
+				case REAL:  tipo1 = REALOPND;
+					valfloat1 = *(quad->opnd1.atr.simb->valfloat);
+					break;
+				case CARACTERE:  tipo1 = INTOPND;
+					valint1 = *(quad->opnd1.atr.simb->valchar);
+					break;
+			}
+			break;
+	}
+  switch (quad->opnd2.tipo) {
+  		case INTOPND:
+  			tipo2 = INTOPND;  valint2 = quad->opnd2.atr.valint;  break;
+  		case REALOPND:
+  			tipo2=REALOPND;valfloat2 = quad->opnd2.atr.valfloat;break;
+  		case CHAROPND:
+  			tipo2 = INTOPND;valint2 = quad->opnd2.atr.valchar; break;
+  		case VAROPND:
+  			switch (quad->opnd2.atr.simb->tvar) {
+  				case INTEIRO:  tipo2 = INTOPND;
+  					valint2 = *(quad->opnd2.atr.simb->valint);
+  					break;
+  				case REAL:  tipo2 = REALOPND;
+  					valfloat2 = *(quad->opnd2.atr.simb->valfloat);
+  					break;
+  				case CARACTERE:  tipo2 = INTOPND;
+  					valint2 = *(quad->opnd2.atr.simb->valchar);
+  					break;
+  				}
+  			break;
+  	}
+  if (tipo1 == INTOPND && tipo2 == INTOPND)
+  		*(quad->result.atr.simb->vallogic) = valint1 < valint2;
+	if (tipo1 == INTOPND && tipo2 == REALOPND)
+		*(quad->result.atr.simb->vallogic) = valint1 < valfloat2;
+	if (tipo1 == REALOPND && tipo2 == INTOPND)
+		*(quad->result.atr.simb->vallogic) = valfloat1 < valint2;
+	if (tipo1 == REALOPND && tipo2 == REALOPND)
+		*(quad->result.atr.simb->vallogic) = valfloat1 < valfloat2;
+}
+
+void ExecQuadRead (quadrupla quad) {
+	int i;  operando opndaux;  pilhaoperando pilhaopndaux;
+
+	printf ("\n\t\tLendo: \n");
+	InicPilhaOpnd (&pilhaopndaux);
+	for (i = 1; i <= quad->opnd1.atr.valint; i++) {
+		EmpilharOpnd (TopoOpnd (pilhaopnd), &pilhaopndaux);
+		DesempilharOpnd (&pilhaopnd);
+	}
+  for (i = 1; i <= quad->opnd1.atr.valint; i++) {
+  		opndaux = TopoOpnd (pilhaopndaux);
+  		DesempilharOpnd (&pilhaopndaux);
+        	switch (opndaux.atr.simb->tvar) {
+        		case INTEIRO:
+         			fscanf (finput, "%d", opndaux.atr.simb->valint); break;
+        		case REAL:
+         			fscanf (finput, "%g", opndaux.atr.simb->valfloat);break;
+         		case LOGICO:
+         			fscanf (finput, "%d", opndaux.atr.simb->vallogic); break;
+        		case CARACTERE:
+         			fscanf (finput, "%c", opndaux.atr.simb->valchar); break;
+     		}
+  	}
+}
+
+
+void InterpCodIntermed () {
+	quadrupla quad, quadprox;  char encerra;
+	printf ("\n\nINTERPRETADOR:\n");
+  finput = fopen("entrada2018", "r");
+  InicPilhaOpnd(&pilhaopnd);
+	encerra = FALSO;
+  char condicao;
+	quad = codintermed->prox->listquad->prox;
+	while (! encerra) {
+		printf ("\n%4d) %s", quad->num,
+			nomeoperquad[quad->oper]);
+		quadprox = quad->prox;
+		switch (quad->oper) {
+			case OPEXIT: encerra = VERDADE; break;
+      case OPENMOD: AlocaVariaveis(); break;
+      case PARAM: EmpilharOpnd(quad->opnd1, &pilhaopnd); break;
+      case OPWRITE: ExecQuadWrite(quad); break;
+      case OPMAIS: ExecQuadMais(quad); break;
+      case OPATRIB: ExecQuadAtrib(quad); break;
+      case OPJUMP: quadprox = quad->result.atr.rotulo; break;
+      case OPJF:
+        if (quad->opnd1.tipo == LOGICOPND)
+          condicao = quad->opnd1.atr.vallogic;
+        if (quad->opnd1.tipo == VAROPND)
+          condicao = *(quad->opnd1.atr.simb->vallogic);
+        if (!condicao)
+          quadprox = quad->result.atr.rotulo;
+      break;
+      case OPLT: ExecQuadLT(quad); break;
+      case OPREAD: ExecQuadRead(quad); break;
+		}
+		if (! encerra) quad = quadprox;
+	}
+	printf ("\n");
 }
