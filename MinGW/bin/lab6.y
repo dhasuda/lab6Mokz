@@ -1658,11 +1658,8 @@ void AlocaVariaveis () {
 	printf ("\n\t\tAlocando as variaveis:");
 	for (i = 0; i < NCLASSHASH; i++)
 	       if (tabsimb[i]) {
-                printf("kkkkkkkkk\n");
 	              for (s = tabsimb[i]; s != NULL; s = s->prox){
-                      printf("akdjsfajsdlfjlas\n");
 	                     if (s->tid == IDVAR) {
-                         printf("oooooooooo\n");
 	                            nelemaloc = 1;
 	                            if (s->array)
 	                                   for (j = 1; j <= s->ndims; j++)  nelemaloc *= s->dims[j];
@@ -1679,6 +1676,7 @@ void AlocaVariaveis () {
 	                           printf ("\n\t\t\t%s: %d elemento(s) alocado(s) ", s->cadeia, nelemaloc);
 	                   }
 	      	 }
+
 	      }
 }
 
@@ -1966,29 +1964,42 @@ void InterpCodIntermed () {
   char condicao;
 	quad = codintermed->prox->listquad->prox;
 
+  AlocaVariaveis();
+  modhead ok = codintermed->prox;
+  while (ok!=NULL && strcmp(ok->modname->cadeia, "MAIN") != 0 ) {
+    ok = ok->prox;
+  }
+  if (ok==NULL) {
+    encerra = VERDADE;
+  } else {
+    quad = ok->listquad->prox;
+  }
+
 	while (! encerra) {
-		printf ("\n%d) %s", quad->num,
-			nomeoperquad[quad->oper]);
+		printf ("\n%d) %s", quad->num, nomeoperquad[quad->oper]);
 		quadprox = quad->prox;
 		switch (quad->oper) {
-			// case OPEXIT: encerra = VERDADE; break;
-      case OPENMOD: AlocaVariaveis(); break;
-      // case PARAM: EmpilharOpnd(quad->opnd1, &pilhaopnd); break;
-      // case OPWRITE: printf("tomar no cu"); ExecQuadWrite(quad); break;
-      // case OPMAIS: ExecQuadMais(quad); break;
-      // case OPATRIB: ExecQuadAtrib(quad); break;
-      // case OPJUMP: quadprox = quad->result.atr.rotulo; break;
-      // case OPJF:
-      //   if (quad->opnd1.tipo == LOGICOPND)
-      //     condicao = quad->opnd1.atr.vallogic;
-      //   if (quad->opnd1.tipo == VAROPND)
-      //     condicao = *(quad->opnd1.atr.simb->vallogic);
-      //   if (!condicao)
-      //     quadprox = quad->result.atr.rotulo;
-      // break;
-      // case OPLT: ExecQuadLT(quad); break;
-      // case OPREAD: ExecQuadRead(quad); break;
+			case OPEXIT: printf("OPEXIT:\n"); encerra = VERDADE; break;
+      case OPENMOD: printf("OPENMOD:\n"); AlocaVariaveis(); break;
+      case PARAM: printf("PARAM:\n"); EmpilharOpnd(quad->opnd1, &pilhaopnd); break;
+      case OPWRITE: printf("OPWRITE:\n"); ExecQuadWrite(quad); break;
+      case OPMAIS: printf("OPMAIS:\n"); ExecQuadMais(quad); break;
+      case OPATRIB: printf("OPATRIB:\n"); ExecQuadAtrib(quad); break;
+      case OPJUMP: printf("OPJUMP:\n"); quadprox = quad->result.atr.rotulo; break;
+      case OPJF:
+        printf("OPJF:\n");
+        if (quad->opnd1.tipo == LOGICOPND)
+          condicao = quad->opnd1.atr.vallogic;
+        if (quad->opnd1.tipo == VAROPND)
+          condicao = *(quad->opnd1.atr.simb->vallogic);
+        if (!condicao)
+          quadprox = quad->result.atr.rotulo;
+      break;
+      case OPLT: printf("OPLT:\n"); ExecQuadLT(quad); break;
+      case OPREAD: printf("OPREAD:\n"); ExecQuadRead(quad); break;
 		}
+
+    if (quadprox == NULL) {encerra = VERDADE;}
 		if (! encerra) quad = quadprox;
 	}
 	printf ("\n");

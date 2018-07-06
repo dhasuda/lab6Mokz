@@ -2,20 +2,8 @@ AnaliseDeTexto {{{
 
 var {
    char c; logic fim;
-}
-
-void ExibirTabela (  )
-var {
-	logic x;
-}
-statements {
-}
-
-void askjdf ()
-var {
-	logic abac;
-}
-statements {
+   int a;
+   int b;
 }
 
 main
@@ -24,6 +12,7 @@ var {
 }
 statements {
 	c := i;
+  i := a + b;
 }
 
 }}}
