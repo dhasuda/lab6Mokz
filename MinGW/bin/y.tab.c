@@ -3944,47 +3944,16 @@ void TipoErradoDeArgumentos (int tipoEsperado, int arg) {
     }
 }
 
-// void AlocaVariaveis() {
-//   int i; simbolo s;
-//   for (i = 0; i < NCLASSHASH; i++)
-//       if (tabsimb[i]) {
-//          for (s = tabsimb[i]; s!=NULL; s = s->prox){
-//             if (s->tid == IDVAR){
-//
-//               int j;
-//               int totalDeCasas = 1;
-//               for (j=0; j < s->ndims; j++) {
-//                 totalDeCasas *= s->dims[j];
-//               }
-//
-//               switch(s->tvar) {
-//                 case INTEIRO:
-//                   s->valint = (int*) malloc(totalDeCasas*sizeof(int));
-//                 break;
-//                 case LOGICO:
-//                   s->vallogic = (char*) malloc(totalDeCasas*sizeof(char));
-//                 break;
-//                 case REAL:
-//                   s->valfloat = (float*) malloc(totalDeCasas*sizeof(float));
-//                 break;
-//                 case CARACTERE:
-//                   s->valchar = (char*) malloc(totalDeCasas*sizeof(char));
-//                 break;
-//               }
-//               /*
-//               TODO: alocar no celsimb
-//               */
-//             }
-//           }
-//       }
-// }
 void AlocaVariaveis () {
 	simbolo s; int nelemaloc, i, j;
 	printf ("\n\t\tAlocando as variaveis:");
 	for (i = 0; i < NCLASSHASH; i++)
 	       if (tabsimb[i]) {
+                printf("kkkkkkkkk\n");
 	              for (s = tabsimb[i]; s != NULL; s = s->prox){
+                      printf("akdjsfajsdlfjlas\n");
 	                     if (s->tid == IDVAR) {
+                         printf("oooooooooo\n");
 	                            nelemaloc = 1;
 	                            if (s->array)
 	                                   for (j = 1; j <= s->ndims; j++)  nelemaloc *= s->dims[j];
@@ -4287,28 +4256,29 @@ void InterpCodIntermed () {
 	encerra = FALSO;
   char condicao;
 	quad = codintermed->prox->listquad->prox;
+
 	while (! encerra) {
-		printf ("\n%4d) %s", quad->num,
+		printf ("\n%d) %s", quad->num,
 			nomeoperquad[quad->oper]);
 		quadprox = quad->prox;
 		switch (quad->oper) {
-			case OPEXIT: encerra = VERDADE; break;
+			// case OPEXIT: encerra = VERDADE; break;
       case OPENMOD: AlocaVariaveis(); break;
-      case PARAM: EmpilharOpnd(quad->opnd1, &pilhaopnd); break;
-      case OPWRITE: ExecQuadWrite(quad); break;
-      case OPMAIS: ExecQuadMais(quad); break;
-      case OPATRIB: ExecQuadAtrib(quad); break;
-      case OPJUMP: quadprox = quad->result.atr.rotulo; break;
-      case OPJF:
-        if (quad->opnd1.tipo == LOGICOPND)
-          condicao = quad->opnd1.atr.vallogic;
-        if (quad->opnd1.tipo == VAROPND)
-          condicao = *(quad->opnd1.atr.simb->vallogic);
-        if (!condicao)
-          quadprox = quad->result.atr.rotulo;
-      break;
-      case OPLT: ExecQuadLT(quad); break;
-      case OPREAD: ExecQuadRead(quad); break;
+      // case PARAM: EmpilharOpnd(quad->opnd1, &pilhaopnd); break;
+      // case OPWRITE: printf("tomar no cu"); ExecQuadWrite(quad); break;
+      // case OPMAIS: ExecQuadMais(quad); break;
+      // case OPATRIB: ExecQuadAtrib(quad); break;
+      // case OPJUMP: quadprox = quad->result.atr.rotulo; break;
+      // case OPJF:
+      //   if (quad->opnd1.tipo == LOGICOPND)
+      //     condicao = quad->opnd1.atr.vallogic;
+      //   if (quad->opnd1.tipo == VAROPND)
+      //     condicao = *(quad->opnd1.atr.simb->vallogic);
+      //   if (!condicao)
+      //     quadprox = quad->result.atr.rotulo;
+      // break;
+      // case OPLT: ExecQuadLT(quad); break;
+      // case OPREAD: ExecQuadRead(quad); break;
 		}
 		if (! encerra) quad = quadprox;
 	}

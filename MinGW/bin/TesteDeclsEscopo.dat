@@ -1,19 +1,19 @@
 AnaliseDeTexto {{{
 
 var {
-   char c; logic fim; int fim;
+   char c; logic fim;
 }
 
 void ExibirTabela (  )
 var {
-	logic fim;
+	logic x;
 }
 statements {
 }
 
-void c ()
+void askjdf ()
 var {
-	logic abac; int abac;
+	logic abac;
 }
 statements {
 }
@@ -23,7 +23,7 @@ var {
 	int i;
 }
 statements {
-	c := i; 
+	c := i;
 }
 
 }}}
